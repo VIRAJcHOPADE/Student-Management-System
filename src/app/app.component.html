@@ -1,16 +1,18 @@
 <div class="container">
+  
   <div class="row pt-3">
     <div class="col-6">
       <h4>Student Management System</h4>
     </div>
     <div class="col-6 text-end">
       <button class="btn btn-outline-success" (click)="openModel()">Add New</button>
+      <button class="btn btn-outline-info ms-2" routerLink="/old-students">View Old Students</button>
     </div>
   </div>
-  @if (studentList.length !== 0) {
-  <div class="row">
-    @for (item of studentList; track $index) {
-    <div class="col-3">
+<router-outlet></router-outlet>
+  
+  <!-- <div class="row" *ngIf="studentList.length !== 0">
+    <div class="col-3" *ngFor="let item of studentList">
       <div class="card">
         <div class="card-header">
           <div class="row">
@@ -23,89 +25,136 @@
           </div>
         </div>
         <div class="card-body">
-          <p> {{item.city}} , {{item.state}} , {{item.pincode}}</p>
-          <p> {{item.address}}</p>
+          <p>{{item.city}}, {{item.state}}, {{item.pincode}}</p>
+          <p>{{item.address}}</p>
+          <p><strong>Gender:</strong> {{item.gender}}</p> 
         </div>
         <div class="card-footer text-center">
           <div class="row">
             <div class="col-6">
-             <small>{{item.email}}</small> 
+              <small>{{item.email}}</small>
             </div>
             <div class="col-6">
               <button class="btn btn-sm btn-primary" (click)="onEdit(item)">Edit</button>
-              <button class="btn btn-sm btn-danger" (click)="onDelete(item)">Delet</button>
+              <button class="btn btn-sm btn-danger" (click)="onDelete(item)">Delete</button>
             </div>
           </div>
-
         </div>
       </div>
     </div>
-    }
   </div>
-  } @else { 
-    <div class="row">
-      <div class="col-12 p-4 text-center">
-        <p>No Record Found. Create New Record</p>
-      </div>
+
+  
+  <div class="row" *ngIf="studentList.length === 0">
+    <div class="col-12 p-4 text-center">
+      <p>No Record Found. Create New Record</p>
     </div>
-  }
+  </div>
+</div> -->
 
-</div>
-
-
+<!-- Modal Form -->
 <div class="modal" id="myModal" #myModal>
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">Create New Student</h4>
+        <h4 class="modal-title">{{currentStudentId ? 'Update Student' : 'Create New Student'}}</h4>
         <button type="button" class="btn-close" (click)="closeModel()"></button>
       </div>
       <div class="modal-body">
-        <div class="row">
-          <div class="col-8">
-            <label for="">Name</label>
-            <input type="text" [(ngModel)]="studentObj.name" class="form-control" placeholder="Name">
+        <form [formGroup]="studentForm">
+          <div class="row">
+            <div class="col-8">
+              <label for="name">Name</label>
+              <input id="name" formControlName="name" class="form-control" placeholder="Name"
+                     [ngClass]="{'is-invalid': studentForm.get('name')?.invalid && studentForm.get('name')?.touched}">
+              <div *ngIf="studentForm.get('name')?.invalid && studentForm.get('name')?.touched" class="invalid-feedback">
+                Name is required.
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-6">
-            <label for="">Mobile No</label>
-            <input type="text" [(ngModel)]="studentObj.mobileNo" class="form-control" placeholder="Mobile">
+          <div class="row">
+            <div class="col-6">
+              <label for="mobileNo">Mobile No</label>
+              <input id="mobileNo" formControlName="mobileNo" class="form-control" placeholder="Mobile"
+                     [ngClass]="{'is-invalid': studentForm.get('mobileNo')?.invalid && studentForm.get('mobileNo')?.touched}">
+              <div *ngIf="studentForm.get('mobileNo')?.invalid && studentForm.get('mobileNo')?.touched" class="invalid-feedback">
+                Mobile No must be a 10-digit number.
+              </div>
+            </div>
+            <div class="col-6">
+              <label for="email">Email</label>
+              <input id="email" formControlName="email" class="form-control" placeholder="Email"
+                     [ngClass]="{'is-invalid': studentForm.get('email')?.invalid && studentForm.get('email')?.touched}">
+              <div *ngIf="studentForm.get('email')?.invalid && studentForm.get('email')?.touched" class="invalid-feedback">
+                Enter a valid email address.
+              </div>
+            </div>
           </div>
-          <div class="col-6">
-            <label for="">Email</label>
-            <input type="text" [(ngModel)]="studentObj.email" class="form-control" placeholder="Email">
+          <div class="row">
+            <div class="col-4">
+              <label for="city">City</label>
+              <select id="city" formControlName="city" class="form-control"
+                      [ngClass]="{'is-invalid': studentForm.get('city')?.invalid && studentForm.get('city')?.touched}">
+                <option value="" disabled>Select City</option>
+                <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+              </select>
+              <div *ngIf="studentForm.get('city')?.invalid && studentForm.get('city')?.touched" class="invalid-feedback">
+                City is required.
+              </div>
+            </div>
+            <div class="col-4">
+              <label for="state">State</label>
+              <input id="state" formControlName="state" class="form-control" placeholder="State"
+                     [ngClass]="{'is-invalid': studentForm.get('state')?.invalid && studentForm.get('state')?.touched}">
+              <div *ngIf="studentForm.get('state')?.invalid && studentForm.get('state')?.touched" class="invalid-feedback">
+                State is required.
+              </div>
+            </div>
+            <div class="col-4">
+              <label for="pincode">Pin Code</label>
+              <input id="pincode" formControlName="pincode" class="form-control" placeholder="Pin Code"
+                     [ngClass]="{'is-invalid': studentForm.get('pincode')?.invalid && studentForm.get('pincode')?.touched}">
+              <div *ngIf="studentForm.get('pincode')?.invalid && studentForm.get('pincode')?.touched" class="invalid-feedback">
+                Pin Code must be a 6-digit number.
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-4">
-            <label for="">City</label>
-            <input type="text" [(ngModel)]="studentObj.city" class="form-control" placeholder="City">
+          <div class="row">
+            <div class="col-12">
+              <label for="address">Address</label>
+              <textarea id="address" formControlName="address" rows="3" class="form-control"
+                        [ngClass]="{'is-invalid': studentForm.get('address')?.invalid && studentForm.get('address')?.touched}"></textarea>
+              <div *ngIf="studentForm.get('address')?.invalid && studentForm.get('address')?.touched" class="invalid-feedback">
+                Address is required.
+              </div>
+            </div>
           </div>
-          <div class="col-4">
-            <label for="">State</label>
-            <input type="text" [(ngModel)]="studentObj.state" class="form-control" placeholder="State">
+          <div class="row">
+            <div class="col-12">
+              <label>Gender</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" id="male" formControlName="gender" value="Male">
+                <label class="form-check-label" for="male">Male</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" id="female" formControlName="gender" value="Female">
+                <label class="form-check-label" for="female">Female</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" id="other" formControlName="gender" value="Other">
+                <label class="form-check-label" for="other">Other</label>
+              </div>
+              <div *ngIf="studentForm.get('gender')?.invalid && studentForm.get('gender')?.touched" class="invalid-feedback">
+                Gender is required.
+              </div>
+            </div>
           </div>
-          <div class="col-4">
-            <label for="">Pin Code</label>
-            <input type="text" [(ngModel)]="studentObj.pincode" class="form-control" placeholder="Pin Code">
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-12">
-            <label for="">Address</label>
-            <textarea rows="3" [(ngModel)]="studentObj.address" class="form-control"></textarea>
-          </div>
-        </div>
+        </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-danger" (click)="closeModel()">Close</button>
-        @if (studentObj.id ==0) {
-          <button type="button" class="btn btn-primary" (click)="saveStudent()">Save Student</button>
-        } @else {
-          <button type="button" class="btn btn-success" (click)="updateStud()">Update Student</button>
-        }
-       
+        <button type="button" class="btn btn-primary" (click)="saveStudent()" [disabled]="!studentForm.valid" *ngIf="!currentStudentId">Save Student</button>
+        <button type="button" class="btn btn-success" (click)="updateStudent()" [disabled]="!studentForm.valid" *ngIf="currentStudentId">Update Student</button>
       </div>
     </div>
   </div>

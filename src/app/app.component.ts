@@ -1,86 +1,110 @@
-import { CommonModule } from '@angular/common';
-import { Component, ElementRef, ViewChild, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { RouterOutlet } from '@angular/router';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterModule, RouterOutlet } from '@angular/router';
+import { NgIf, NgFor, CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, FormsModule],
+  imports: [ReactiveFormsModule, RouterOutlet, CommonModule, NgIf, NgFor,RouterModule],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
   @ViewChild('myModal') model: ElementRef | undefined;
-  studentObj: Student = new Student();
+  studentForm: FormGroup;
   studentList: Student[] = [];
+  currentStudentId: number | null = null;
+  cities: string[] = ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'];
+
+  constructor(private fb: FormBuilder) {
+    this.studentForm = this.fb.group({
+      id: [0],
+      name: ['', Validators.required],
+      mobileNo: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+      email: ['', [Validators.required, Validators.email]],
+      city: ['', Validators.required],
+      state: ['', Validators.required],
+      pincode: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
+      address: ['', Validators.required],
+      gender: ['', Validators.required]  
+    });
+  }
 
   ngOnInit(): void {
     const localData = localStorage.getItem("angular17crud");
-    if(localData != null) {
-      this.studentList = JSON.parse(localData)
+    if (localData != null) {
+      this.studentList = JSON.parse(localData);
     }
   }
 
-  openModel() {
-    
-    const model = document.getElementById("myModal");
-    if (model != null) {
-      model.style.display = 'block'
+  openModel(student?: Student) {
+    if (student) {
+      this.currentStudentId = student.id;
+      this.studentForm.patchValue(student);
+    } else {
+      this.currentStudentId = null;
+      this.studentForm.reset();
+    }
+    const modal = document.getElementById("myModal");
+    if (modal) {
+      modal.style.display = 'block';
     }
   }
 
   closeModel() {
-    this.studentObj = new Student();
-    if (this.model != null) {
-      this.model.nativeElement.style.display = 'none';
+    this.studentForm.reset();
+    const modal = document.getElementById("myModal");
+    if (modal) {
+      modal.style.display = 'none';
     }
   }
 
   onDelete(item: Student) {
-    const isDelet = confirm("Are you sure want to Delete");
-    if(isDelet) {
-      const currentRecord =  this.studentList.findIndex(m=> m.id === this.studentObj.id);
-      this.studentList.splice(currentRecord,1);
-      localStorage.setItem('angular17crud', JSON.stringify(this.studentList));
+    const isDelet = confirm("Are you sure you want to delete this record?");
+    if (isDelet) {
+      const currentRecordIndex = this.studentList.findIndex(m => m.id === item.id);
+      if (currentRecordIndex !== -1) {
+        this.studentList.splice(currentRecordIndex, 1);
+        localStorage.setItem('angular17crud', JSON.stringify(this.studentList));
+      }
     }
-  }
-  onEdit(item: Student) {
-    this.studentObj =  item;
-    this.openModel();
   }
 
-  updateStud() {
-      const currentRecord =  this.studentList.find(m=> m.id === this.studentObj.id);
-      if(currentRecord != undefined) {
-        currentRecord.name = this.studentObj.name;
-        currentRecord.address =  this.studentObj.address;
-        currentRecord.mobileNo =  this.studentObj.mobileNo;
-      };
-      localStorage.setItem('angular17crud', JSON.stringify(this.studentList));
-      this.closeModel()
+  onEdit(item: Student) {
+    this.openModel(item);
   }
-  saveStudent() {
-    debugger;
-    const isLocalPresent = localStorage.getItem("angular17crud");
-    if (isLocalPresent != null) {
-      
-      const oldArray = JSON.parse(isLocalPresent);
-      this.studentObj.id = oldArray.length + 1;
-      oldArray.push(this.studentObj);
-      this.studentList = oldArray;
-      localStorage.setItem('angular17crud', JSON.stringify(oldArray));
-    } else {
-      const newArr = [];
-      newArr.push(this.studentObj);
-      this.studentObj.id = 1;
-      this.studentList = newArr;
-      localStorage.setItem('angular17crud', JSON.stringify(newArr));
+
+  updateStudent() {
+    if (this.studentForm.valid) {
+      const updatedStudent = this.studentForm.value as Student;
+      const currentRecordIndex = this.studentList.findIndex(m => m.id === updatedStudent.id);
+      if (currentRecordIndex !== -1) {
+        this.studentList[currentRecordIndex] = updatedStudent;
+        localStorage.setItem('angular17crud', JSON.stringify(this.studentList));
+      }
+      this.closeModel();
     }
-    this.closeModel()
+  }
+
+  saveStudent() {
+    if (this.studentForm.valid) {
+      const newStudent = this.studentForm.value as Student;
+      if (this.currentStudentId) {
+        const currentRecordIndex = this.studentList.findIndex(m => m.id === this.currentStudentId);
+        if (currentRecordIndex !== -1) {
+          this.studentList[currentRecordIndex] = newStudent;
+        }
+      } else {
+        const id = this.studentList.length ? Math.max(...this.studentList.map(s => s.id)) + 1 : 1;
+        newStudent.id = id;
+        this.studentList.push(newStudent);
+      }
+      localStorage.setItem('angular17crud', JSON.stringify(this.studentList));
+      this.closeModel();
+    }
   }
 }
-
 
 export class Student {
   id: number;
@@ -91,16 +115,17 @@ export class Student {
   state: string;
   pincode: string;
   address: string;
+  gender: string;  
 
   constructor() {
     this.id = 0;
-    this.address = '';
-    this.city = '';
-    this.email = '';
-    this.mobileNo = '';
     this.name = '';
+    this.mobileNo = '';
+    this.email = '';
+    this.city = '';
     this.state = '';
     this.pincode = '';
+    this.address = '';
+    this.gender = '';  
   }
-
 }
