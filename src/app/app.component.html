@@ -1,4 +1,128 @@
 <div class="container">
+  <div class="row pt-3">
+    <div class="col-6">
+      <h4>Student Management System</h4>
+    </div>
+    <div class="col-6 text-end">
+      <button class="btn btn-outline-success" (click)="openModal()">Add New</button>
+      <button class="btn btn-outline-info ms-2" routerLink="/old-students">View Old Students</button>
+    </div>
+  </div>
+  <router-outlet></router-outlet>
+
+  <div class="modal" id="myModal" #myModal>
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">{{currentStudentId ? 'Update Student' : 'Create New Student'}}</h4>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body">
+          <form #studentForm="ngForm" (ngSubmit)="saveStudent(studentForm)">
+            <div class="row">
+              <div class="col-8">
+                <label for="name">Name</label>
+                <input id="name" name="name" [(ngModel)]="student.name" class="form-control"
+                  placeholder="Name" [ngClass]="{'is-invalid': studentForm.submitted && !student.name, 'is-valid': student.name}" required>
+                <div *ngIf="studentForm.submitted && !student.name" class="invalid-feedback">
+                  Name is required.
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-6">
+                <label for="mobileNo">Mobile No</label>
+                <input id="mobileNo" name="mobileNo" [(ngModel)]="student.mobileNo" class="form-control"
+                  placeholder="Mobile" [ngClass]="{'is-invalid': studentForm.submitted && isMobileNoInvalid(student.mobileNo), 'is-valid': !isMobileNoInvalid(student.mobileNo)}" required>
+                <div *ngIf="studentForm.submitted && isMobileNoInvalid(student.mobileNo)" class="invalid-feedback">
+                  Mobile No must be a 10-digit number.
+                </div>
+              </div>
+              <div class="col-6">
+                <label for="email">Email</label>
+                <input id="email" name="email" [(ngModel)]="student.email" class="form-control"
+                  placeholder="Email" type="email" [ngClass]="{'is-invalid': studentForm.submitted && !student.email, 'is-valid': student.email}" required>
+                <div *ngIf="studentForm.submitted && !student.email" class="invalid-feedback">
+                  Enter a valid email address.
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-4">
+                <label for="city">City</label>
+                <select id="city" name="city" [(ngModel)]="student.city" class="form-control"
+                  [ngClass]="{'is-invalid': studentForm.submitted && !student.city, 'is-valid': student.city}" required>
+                  <option value="" disabled>Select City</option>
+                  <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+                </select>
+                <div *ngIf="studentForm.submitted && !student.city" class="invalid-feedback">
+                  City is required.
+                </div>
+              </div>
+              <div class="col-4">
+                <label for="state">State</label>
+                <input id="state" name="state" [(ngModel)]="student.state" class="form-control"
+                  placeholder="State" [ngClass]="{'is-invalid': studentForm.submitted && !student.state, 'is-valid': student.state}" required>
+                <div *ngIf="studentForm.submitted && !student.state" class="invalid-feedback">
+                  State is required.
+                </div>
+              </div>
+              <div class="col-4">
+                <label for="pincode">Pin Code</label>
+                <input id="pincode" name="pincode" [(ngModel)]="student.pincode" class="form-control"
+                  placeholder="Pin Code" [ngClass]="{'is-invalid': studentForm.submitted && isPincodeInvalid(student.pincode), 'is-valid': !isPincodeInvalid(student.pincode)}" required>
+                <div *ngIf="studentForm.submitted && isPincodeInvalid(student.pincode)" class="invalid-feedback">
+                  Pin Code must be a 6-digit number.
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12">
+                <label for="address">Address</label>
+                <textarea id="address" name="address" [(ngModel)]="student.address" rows="3" class="form-control"
+                  [ngClass]="{'is-invalid': studentForm.submitted && !student.address, 'is-valid': student.address}" required></textarea>
+                <div *ngIf="studentForm.submitted && !student.address" class="invalid-feedback">
+                  Address is required.
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12">
+                <label>Gender</label>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" id="male" name="gender" [(ngModel)]="student.gender" value="Male" required>
+                  <label class="form-check-label" for="male">Male</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" id="female" name="gender" [(ngModel)]="student.gender" value="Female" required>
+                  <label class="form-check-label" for="female">Female</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" id="other" name="gender" [(ngModel)]="student.gender" value="Other" required>
+                  <label class="form-check-label" for="other">Other</label>
+                </div>
+                <div *ngIf="studentForm.submitted && !student.gender" class="invalid-feedback">
+                  Gender is required.
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-danger" (click)="closeModal()">Close</button>
+              <button type="submit" class="btn btn-primary" [disabled]="!studentForm.valid && studentForm.submitted" *ngIf="!currentStudentId">Save Student</button>
+              <button type="submit" class="btn btn-success" [disabled]="!studentForm.valid && studentForm.submitted" *ngIf="currentStudentId">Update Student</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<!-- <div class="container">
   
   <div class="row pt-3">
     <div class="col-6">
@@ -11,7 +135,7 @@
   </div>
 <router-outlet></router-outlet>
   
-  <!-- <div class="row" *ngIf="studentList.length !== 0">
+<div class="row" *ngIf="studentList.length !== 0">
     <div class="col-3" *ngFor="let item of studentList">
       <div class="card">
         <div class="card-header">
@@ -50,9 +174,9 @@
       <p>No Record Found. Create New Record</p>
     </div>
   </div>
-</div> -->
+</div> 
 
-<!-- Modal Form -->
+
 <div class="modal" id="myModal" #myModal>
   <div class="modal-dialog">
     <div class="modal-content">
@@ -158,4 +282,4 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->

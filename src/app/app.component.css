@@ -4,15 +4,19 @@ body {
     padding: 20px;
 }
 
-.is-invalid {
-    border: 1px solid red;
+
+.invalid-feedback {
+    color: red;
   }
   
-  .invalid-feedback {
-    color: red;
-    font-size: 0.875em;
-    margin-top: 0.25rem;
+  .is-invalid {
+    border-color: red;
   }
+  
+  .is-valid {
+    border-color: green;
+  }
+  
   
 .container {
     margin-top: 20px;
